@@ -1,6 +1,5 @@
 # Spotify AI-Powered Review Discovery Engine — Phase-wise Architecture
 
-> **Project:** NextLeap Graduation Project · Part 2  
 > **Stack:** Python · Streamlit · Groq API · Gemini API · Pandas  
 > **Deployment Target:** Streamlit Community Cloud  
 > **Build Timeline:** 2 days (Day 1 = Phases 0–4 | Day 2 = Phases 5–6)

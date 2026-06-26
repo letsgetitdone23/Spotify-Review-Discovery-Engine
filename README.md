@@ -1,6 +1,5 @@
 # Spotify AI-Powered Review Discovery Engine
 
-> **NextLeap Graduation Project — Part 2**  
 > A Streamlit-based web application to analyze Spotify user reviews focusing on music discovery friction and repetitive listening behaviors.
 
 ---
