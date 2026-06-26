@@ -1,0 +1,19 @@
+# Environment — never commit real keys
+.env
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Streamlit secrets (for local dev)
+.streamlit/secrets.toml
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/

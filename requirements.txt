@@ -1,0 +1,12 @@
+streamlit
+pandas
+openpyxl
+requests
+beautifulsoup4
+google-play-scraper
+groq>=1.5.0
+httpx>=0.28.1
+google-genai
+python-dotenv
+langdetect
+fpdf2
