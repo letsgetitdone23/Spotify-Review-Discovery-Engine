@@ -230,6 +230,7 @@ from modules.filter_relevance import filter_relevant, filter_summary
 from modules.ai_pipeline import run_analysis
 from modules.scraper_playstore import scrape_playstore_reviews
 from modules.scraper_appstore import scrape_appstore_reviews
+from modules.scraper_spotify_community import scrape_spotify_community
 from modules.exporter import export_markdown, export_csv
 from components.report_renderer import (
     render_dataset_overview,
@@ -261,7 +262,10 @@ with st.sidebar:
 
     if mode == "Live Collection":
         st.info(
-            "Scrapes live reviews from Google Play Store & Apple App Store in real-time.",
+            "Scrapes live discussions from:\n"
+            "- 🛒 Google Play Store reviews\n"
+            "- 🍎 Apple App Store reviews\n"
+            "- 💬 Spotify Community forum (RSS)",
             icon="🌐",
         )
         scrape_count = st.slider(
@@ -280,7 +284,6 @@ with st.sidebar:
     run_btn = st.button("▶  Run Analysis", use_container_width=True)
 
     st.markdown("---")
-    st.markdown('<p class="muted" style="font-size:0.8rem;">Day 2 build — Phase 6 complete</p>', unsafe_allow_html=True)
 
 # ===========================================================================
 # Main panel — header
@@ -316,12 +319,23 @@ if run_btn:
     with st.spinner("Loading reviews..."):
         try:
             if mode == "Live Collection":
-                with st.spinner("Scraping live reviews (Play Store + App Store)..."):
-                    play_count = max(10, int(scrape_count * 0.75))
-                    app_count  = max(10, scrape_count - play_count)
-                    play_reviews = scrape_playstore_reviews(count=play_count)
-                    app_reviews  = scrape_appstore_reviews(count=app_count)
-                    all_scraped = play_reviews + app_reviews
+                with st.spinner("Scraping live reviews (Play Store + App Store + Community)..."):
+                    # Distribute count: 60% Play Store, 20% App Store, 20% Community
+                    play_count      = max(10, int(scrape_count * 0.60))
+                    app_count       = max(10, int(scrape_count * 0.20))
+                    community_count = max(10, scrape_count - play_count - app_count)
+
+                    play_reviews      = scrape_playstore_reviews(count=play_count)
+                    app_reviews       = scrape_appstore_reviews(count=app_count)
+                    community_reviews = scrape_spotify_community(count=community_count)
+
+                    all_scraped = play_reviews + app_reviews + community_reviews
+
+                    # Status breakdown toast
+                    parts = []
+                    if play_reviews:      parts.append(f"{len(play_reviews)} Play Store")
+                    if app_reviews:       parts.append(f"{len(app_reviews)} App Store")
+                    if community_reviews: parts.append(f"{len(community_reviews)} Community")
                     
                     if not all_scraped:
                         st.warning("Failed to scrape live reviews. Falling back to preloaded dataset.", icon="⚠")
@@ -334,7 +348,8 @@ if run_btn:
                             df["language"] = "en"
                         if "rating" not in df.columns:
                             df["rating"] = None
-                        st.toast(f"✅ Scraped {len(df)} live reviews!", icon="🌐")
+                        summary = " · ".join(parts) if parts else f"{len(df)} total"
+                        st.toast(f"✅ Scraped {len(df)} reviews — {summary}", icon="🌐")
             else:
                 df = load_preloaded_reviews()
                 
@@ -415,7 +430,7 @@ if st.session_state.report is not None:
         render_themes(report.get("themes", []))
 
     with tabs[2]:
-        render_six_questions(report.get("questions", {}))
+        render_six_questions(report.get("questions", {}), filtered_df)
 
     with tabs[3]:
         render_segments(report.get("questions", {}))

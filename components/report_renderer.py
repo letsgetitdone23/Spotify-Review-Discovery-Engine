@@ -15,6 +15,8 @@ Tab mapping:
 """
 
 import streamlit as st
+import pandas as pd
+import plotly.graph_objects as go
 
 
 # ---------------------------------------------------------------------------
@@ -60,6 +62,61 @@ def _rep_chip(rep_type: str) -> str:
         f'border-radius:500px;font-size:0.75rem;font-weight:700;">'
         f'{rep_type}</span>'
     )
+
+
+# ---------------------------------------------------------------------------
+# Helper: Spotify-themed horizontal Plotly bar chart (shared by all tabs)
+# ---------------------------------------------------------------------------
+
+def _spotify_bar_chart(
+    df_in: pd.DataFrame,
+    caption: str = "",
+    bar_color: str = "#1DB954",
+    height: int = 260,
+):
+    """
+    Render a horizontal Plotly bar chart styled in the Spotify dark theme.
+
+    Args:
+        df_in:     DataFrame with a single numeric column; index = category labels.
+        caption:   Optional caption rendered below the chart in muted text.
+        bar_color: Bar fill colour — default Spotify Green #1DB954.
+        height:    Chart height in pixels.
+    """
+    labels = df_in.index.tolist()
+    values = df_in.iloc[:, 0].tolist()
+
+    fig = go.Figure(go.Bar(
+        x=values,
+        y=labels,
+        orientation="h",
+        marker_color=bar_color,
+        marker_line_width=0,
+        hovertemplate="%{y}: %{x}<extra></extra>",
+    ))
+    fig.update_layout(
+        paper_bgcolor="#121212",
+        plot_bgcolor="#121212",
+        font=dict(family="Inter, sans-serif", color="#B3B3B3", size=12),
+        margin=dict(l=10, r=10, t=10, b=10),
+        xaxis=dict(
+            gridcolor="#282828",
+            zerolinecolor="#282828",
+            tickfont=dict(color="#B3B3B3"),
+        ),
+        yaxis=dict(
+            tickfont=dict(color="#FFFFFF", size=11),
+            automargin=True,
+        ),
+        height=height,
+    )
+    st.plotly_chart(fig, use_container_width=True)
+    if caption:
+        st.markdown(
+            f'<p class="muted" style="font-size:0.78rem;text-align:center;margin-top:0.3rem;">'
+            f'{caption}</p>',
+            unsafe_allow_html=True,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -128,7 +185,12 @@ def render_dataset_overview(df, filtered_df, mode: str):
             .reset_index()
         )
         rating_counts.columns = ["Rating (Stars)", "Count"]
-        st.bar_chart(rating_counts.set_index("Rating (Stars)"))
+        _spotify_bar_chart(
+            rating_counts.set_index("Rating (Stars)"),
+            caption="Star rating distribution across analyzed reviews",
+            bar_color="#1DB954",
+            height=220,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -181,18 +243,89 @@ def render_themes(themes: list):
 # Tab 3 — Six Research Questions
 # ---------------------------------------------------------------------------
 
-def render_six_questions(questions: dict):
+def render_six_questions(questions: dict, filtered_df=None):
     """
     Render the Six Questions tab.
 
-    Each question in an st.expander. Q4 (repetition) is rendered as
-    two clearly labelled sub-sections: Unwanted vs Intentional.
+    Each question in an st.expander showing:
+      - AI answer broken into clear bullet points
+      - 1–2 real user review snippets as evidence (sourced from filtered_df)
+
+    Q4 (repetition) renders as two sub-sections: Unwanted vs Intentional.
     """
+    import random
+
     _section_header("Answers to the Six Research Questions")
 
     if "error" in questions:
         st.error(f"Analysis error: {questions['error']}")
         return
+
+    # Keywords used to find matching evidence quotes from real reviews
+    Q_KEYWORDS = {
+        "q1": ["discover", "new music", "new artist", "can't find", "explore", "algorithm", "recommendation"],
+        "q2": ["frustrat", "same song", "repeat", "recommend", "doesn't learn", "feedback", "thumbs", "irrelevant"],
+        "q3": ["mood", "focus", "study", "workout", "gym", "chill", "relax", "vibe", "feel", "explore"],
+        "q4": ["same song", "loop", "repeat", "keeps playing", "comfort", "familiar", "autoplay"],
+        "q5": ["casual", "daily", "power user", "explorer", "mood", "gym", "work", "study", "segment"],
+        "q6": ["need", "want", "wish", "should", "missing", "can't", "unable", "would love"],
+    }
+
+    def _get_evidence(key: str, n: int = 2) -> list:
+        """Return up to n short real review snippets matching this question."""
+        if filtered_df is None or filtered_df.empty:
+            return []
+        kws = Q_KEYWORDS.get(key, [])
+        texts = filtered_df["review_text"].dropna().tolist()
+        matches = [
+            t.strip() for t in texts
+            if any(kw in t.lower() for kw in kws) and 30 < len(t.strip()) < 280
+        ]
+        random.seed(42)
+        sample = random.sample(matches, min(n, len(matches))) if matches else []
+        # Trim to a readable length
+        return [s[:220] + ("…" if len(s) > 220 else "") for s in sample]
+
+    def _text_to_bullets(text: str) -> list:
+        """Split a paragraph of AI text into a list of bullet strings."""
+        if not text:
+            return []
+        # Split on common sentence / clause endings
+        import re
+        parts = re.split(r'(?<=[.!?])\s+(?=[A-Z•\-])', text.strip())
+        # Also handle lines that already start with dash/bullet
+        bullets = []
+        for p in parts:
+            sub = re.split(r'\n\s*[-•]\s*', p)
+            bullets.extend(sub)
+        bullets = [b.strip().lstrip("-•").strip() for b in bullets if b.strip()]
+        return bullets
+
+    def _render_bullets_and_evidence(text: str, key: str):
+        """Render bullet points from AI text + evidence block."""
+        bullets = _text_to_bullets(text)
+        if bullets:
+            for b in bullets:
+                st.markdown(f"- {b}")
+        else:
+            st.write(text)
+
+        evidence = _get_evidence(key)
+        if evidence:
+            st.markdown(
+                '<p style="color:#B3B3B3;font-size:0.8rem;font-weight:700;'
+                'text-transform:uppercase;letter-spacing:0.08em;margin:0.9rem 0 0.4rem 0;">'
+                '🗣 User Evidence</p>',
+                unsafe_allow_html=True,
+            )
+            for quote in evidence:
+                st.markdown(
+                    f'<div style="border-left:3px solid #1DB954;padding:0.5rem 0.8rem;'
+                    f'margin-bottom:0.5rem;background:#1a1a2e;border-radius:0 6px 6px 0;">'
+                    f'<p style="color:#ccc;font-size:0.85rem;margin:0;">'
+                    f'&ldquo;{quote}&rdquo;</p></div>',
+                    unsafe_allow_html=True,
+                )
 
     q_labels = {
         "q1": "❶  Why do users struggle to discover new music?",
@@ -207,28 +340,44 @@ def render_six_questions(questions: dict):
         val = questions.get(key, "Not available.")
         with st.expander(label, expanded=False):
             if key == "q4" and isinstance(val, dict):
-                # Q4 always has unwanted / intentional split
                 st.markdown(
                     '<span style="color:#E8A400;font-weight:700;">⚠ Unwanted Repetition</span>'
                     ' — caused by algorithm failure',
                     unsafe_allow_html=True,
                 )
-                st.write(val.get("unwanted_repetition", "Not available."))
+                _render_bullets_and_evidence(val.get("unwanted_repetition", "Not available."), "q4")
                 st.markdown("---")
                 st.markdown(
                     '<span style="color:#1DB954;font-weight:700;">✓ Intentional Repetition</span>'
                     ' — deliberate user choice',
                     unsafe_allow_html=True,
                 )
-                st.write(val.get("intentional_repetition", "Not available."))
+                _render_bullets_and_evidence(val.get("intentional_repetition", "Not available."), "q4")
             elif isinstance(val, dict):
                 for k, v in val.items():
-                    st.markdown(f"**{k.replace('_', ' ').title()}:** {v}")
+                    st.markdown(f"**{k.replace('_', ' ').title()}:**")
+                    _render_bullets_and_evidence(str(v), key)
             elif isinstance(val, list):
                 for item in val:
                     st.markdown(f"- {item}")
+                evidence = _get_evidence(key)
+                if evidence:
+                    st.markdown(
+                        '<p style="color:#B3B3B3;font-size:0.8rem;font-weight:700;'
+                        'text-transform:uppercase;letter-spacing:0.08em;margin:0.9rem 0 0.4rem 0;">'
+                        '🗣 User Evidence</p>',
+                        unsafe_allow_html=True,
+                    )
+                    for quote in evidence:
+                        st.markdown(
+                            f'<div style="border-left:3px solid #1DB954;padding:0.5rem 0.8rem;'
+                            f'margin-bottom:0.5rem;background:#1a1a2e;border-radius:0 6px 6px 0;">'
+                            f'<p style="color:#ccc;font-size:0.85rem;margin:0;">'
+                            f'&ldquo;{quote}&rdquo;</p></div>',
+                            unsafe_allow_html=True,
+                        )
             else:
-                st.write(val)
+                _render_bullets_and_evidence(str(val), key)
 
 
 # ---------------------------------------------------------------------------
@@ -405,8 +554,6 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
         filtered_df: Discovery-relevant reviews only
         report:      Full report dict (for questions + segments from Call 2)
     """
-    import pandas as pd
-
     _section_header("Key Insights & Actionable Takeaways")
 
     if "error" in data:
@@ -485,13 +632,6 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
             unsafe_allow_html=True,
         )
 
-    def _chart_caption(caption: str):
-        st.markdown(
-            f'<p class="muted" style="font-size:0.78rem;text-align:center;margin-top:0.3rem;">'
-            f'{caption}</p>',
-            unsafe_allow_html=True,
-        )
-
 
     # ================================================================== #
     # Q1 — Why do users struggle to discover new music?
@@ -510,8 +650,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                 "Filter bubble / echo chamber":    ["bubble", "echo chamber", "comfort zone", "stuck in", "always plays"],
                 "Poor discovery features":         ["discover", "new music", "new artist", "can't find", "hard to find", "explore"],
             })
-            st.bar_chart(q1_df, use_container_width=True, horizontal=True)
-            _chart_caption("Reviews mentioning each discovery-struggle pattern")
+            _spotify_bar_chart(q1_df, "Reviews mentioning each discovery-struggle pattern")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
@@ -534,8 +673,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                 "Already-heard songs recycled":    ["already heard", "already know", "old songs", "recommend same", "heard before"],
                 "Algorithm ignores context":        ["context", "ignores what", "doesn't remember", "time of day", "mood"],
             })
-            st.bar_chart(q2_df, use_container_width=True, horizontal=True)
-            _chart_caption("Reviews citing each recommendation frustration")
+            _spotify_bar_chart(q2_df, "Reviews citing each recommendation frustration")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
@@ -558,8 +696,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                 "Workout / high energy":            ["workout", "gym", "exercise", "run", "energy", "pump", "motivation"],
                 "Social / shared listening":        ["share", "friend", "collaborate", "social", "group", "party", "together"],
             })
-            st.bar_chart(q3_df, use_container_width=True, horizontal=True)
-            _chart_caption("Reviews indicating each listening goal")
+            _spotify_bar_chart(q3_df, "Reviews indicating each listening goal")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
@@ -598,8 +735,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                 "Limited library / offline mode":       ["offline", "downloaded", "limited library", "few songs", "cache"],
                 "Mood anchoring":                       ["matches my mood", "perfect for", "fits the mood", "suits", "matches how"],
             })
-            st.bar_chart(q4_df, use_container_width=True, horizontal=True)
-            _chart_caption("Reviews attributing repetition to each cause — orange = unwanted, green = intentional")
+            _spotify_bar_chart(q4_df, "Reviews attributing repetition to each cause — orange = unwanted, green = intentional")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
@@ -652,8 +788,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                     count = sum(1 for t in texts if any(kw in str(t).lower() for kw in kws)) if kws else 0
                     seg_rows.append({"Segment": name, "Matching Reviews": count})
                 seg_df = pd.DataFrame(seg_rows).set_index("Segment")
-                st.bar_chart(seg_df, use_container_width=True, horizontal=True)
-                _chart_caption("Estimated review volume per AI-identified user segment")
+                _spotify_bar_chart(seg_df, "Estimated review volume per AI-identified user segment")
             else:
                 q5_df = _kw_counts(texts, {
                     "Casual listeners":          ["casual", "sometimes", "occasionally", "whenever"],
@@ -662,8 +797,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                     "Mood-driven listeners":      ["mood", "feeling", "emotion", "vibe"],
                     "Comfort / repeat listeners": ["same playlist", "comfort", "familiar songs", "safe", "go-to"],
                 })
-                st.bar_chart(q5_df, use_container_width=True, horizontal=True)
-                _chart_caption("Keyword-proxy segment volume (AI segments not available)")
+                _spotify_bar_chart(q5_df, "Keyword-proxy segment volume (AI segments not available)")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
@@ -713,8 +847,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                     .sort_values("Matching Reviews", ascending=False)
                     .set_index("Unmet Need")
                 )
-                st.bar_chart(need_df, use_container_width=True, horizontal=True)
-                _chart_caption("AI-extracted unmet needs ranked by review corpus signal")
+                _spotify_bar_chart(need_df, "AI-extracted unmet needs ranked by review corpus signal")
             else:
                 q6_df = _kw_counts(texts, {
                     "Better discovery tools":       ["better discover", "improve discover", "discovery feature", "new music"],
@@ -723,8 +856,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
                     "Block / hide songs":            ["block", "hide", "never play", "ban", "exclude", "don't play again"],
                     "Feedback that works":           ["take my feedback", "listen to me", "thumbs work", "feedback"],
                 })
-                st.bar_chart(q6_df, use_container_width=True, horizontal=True)
-                _chart_caption("Keyword-proxy unmet need volume (AI needs not available)")
+                _spotify_bar_chart(q6_df, "Keyword-proxy unmet need volume (AI needs not available)")
         except Exception as e:
             st.warning(f"Chart unavailable: {e}")
 
