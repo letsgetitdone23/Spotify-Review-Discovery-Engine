@@ -245,7 +245,7 @@ Three prompt-builder functions. **Never hardcode review text inside prompts** �
 | Function | Input | Output Format |
 |----------|-------|--------------|
 | `prompt_themes_and_filter(reviews_block)` | Raw review text block | `[{theme, description, frequency, example}]` — JSON array |
-| `prompt_six_questions_and_segments(summary, n)` | Compressed theme summary | `{q1..q6, segments:[...]}` — JSON object |
+| `prompt_six_questions_and_segments(summary, n)` | Compressed theme summary | `{q1..q6 each with explanation, key_insights, evidence, segments:[...]}` — JSON object |
 | `prompt_root_causes_and_needs(summary)` | Compressed theme summary | `{root_causes, unwanted_repetition_causes, intentional_repetition_note, unmet_needs, key_insights}` — JSON object |
 
 **Prompt Constraints (all 3 prompts enforce these):**
@@ -344,8 +344,11 @@ Applied via `st.markdown(SPOTIFY_CSS, unsafe_allow_html=True)` at the top of `ap
 - Quoted paraphrased review example with left green border
 
 **Tab 3 — Six Questions:**
-- `st.expander` for each question
-- Q4 (repetition) renders as two sub-keys: `unwanted_repetition` + `intentional_repetition`
+- `st.expander` for each question containing:
+  - Detailed explanation paragraph (150–200 words)
+  - Key Insights bullet points
+  - Supporting Review Evidence (AI-paraphrased & real snippets)
+- Fallback structure support for older formats (including Q4 split)
 
 **Tab 4 — Segments:**
 - One card per segment
@@ -364,7 +367,7 @@ Applied via `st.markdown(SPOTIFY_CSS, unsafe_allow_html=True)` at the top of `ap
 **Tab 7 — Key Insights & Infographics:**
 - One card per key insight: observation · impact on listener · actionable takeaway (green bordered panel)
 - **6 infographic sections** — one per research question — each rendered as a full-width row with two columns:
-  - **Left column — AI Analysis panel** (dark navy, green left border): verbatim LLM answer from Call 2 (`report["questions"]["q1"–"q6"]`)
+  - **Left column — AI Analysis panel** (dark navy, green left border): explanation text from Call 2 (`report["questions"]["q1"–"q6"]["explanation"]`)
   - **Right column — Keyword-frequency bar chart**: horizontal bar chart counting how many discovery-relevant reviews mention each pattern
 - Q4 panel splits into ⚠ Unwanted Repetition (amber) and ✓ Intentional Repetition (green) sub-sections
 - Q5 panel renders AI-identified segment cards (name + repetition-type badge + discovery blocker); chart uses segment keywords back-matched to review corpus
@@ -374,10 +377,10 @@ Applied via `st.markdown(SPOTIFY_CSS, unsafe_allow_html=True)` at the top of `ap
 
 | Infographic | Research Question | AI Panel Source | Chart Keyword Groups |
 |---|---|---|---|
-| ❶ | Why do users struggle to discover new music? | `questions["q1"]` | Algorithm, Repetitive recs, No variety, Filter bubble, Poor discovery |
-| ❷ | Most common recommendation frustrations? | `questions["q2"]` | Feedback ignored, No variety, Taste mismatch, Recycled songs, Context blindness |
-| ❸ | Listening behaviors users try to achieve? | `questions["q3"]` | Active discovery, Mood, Focus/work, Workout, Social |
-| ❹ | Causes of repeated listening? | `questions["q4"]` (dict) | Algo loop, Comfort/familiar, Autoplay, Offline, Mood anchoring |
+| ❶ | Why do users struggle to discover new music? | `questions["q1"]["explanation"]` | Algorithm, Repetitive recs, No variety, Filter bubble, Poor discovery |
+| ❷ | Most common recommendation frustrations? | `questions["q2"]["explanation"]` | Feedback ignored, No variety, Taste mismatch, Recycled songs, Context blindness |
+| ❸ | Listening behaviors users try to achieve? | `questions["q3"]["explanation"]` | Active discovery, Mood, Focus/work, Workout, Social |
+| ❹ | Causes of repeated listening? | `questions["q4"]["explanation"]` | Algo loop, Comfort/familiar, Autoplay, Offline, Mood anchoring |
 | ❺ | Which segments face different challenges? | `questions["segments"]` (cards) | Segment keywords back-matched to corpus |
 | ❻ | Unmet needs across reviews? | `data["unmet_needs"]` (cards) | Need keywords back-matched, sorted by volume |
 

@@ -248,10 +248,9 @@ def render_six_questions(questions: dict, filtered_df=None):
     Render the Six Questions tab.
 
     Each question in an st.expander showing:
-      - AI answer broken into clear bullet points
-      - 1–2 real user review snippets as evidence (sourced from filtered_df)
-
-    Q4 (repetition) renders as two sub-sections: Unwanted vs Intentional.
+      - A detailed paragraph answer (150-200 words)
+      - Key Insights for that particular question
+      - Evidence from the Reviews (AI paraphrased + real matching snippets)
     """
     import random
 
@@ -339,7 +338,49 @@ def render_six_questions(questions: dict, filtered_df=None):
     for key, label in q_labels.items():
         val = questions.get(key, "Not available.")
         with st.expander(label, expanded=False):
-            if key == "q4" and isinstance(val, dict):
+            if isinstance(val, dict) and "explanation" in val:
+                # 1. Clear explanation paragraph (150-200 words)
+                st.markdown(
+                    f'<p style="font-size:0.95rem; line-height:1.6; color:#E0E0E0; margin-bottom:1rem; text-align:justify;">'
+                    f'{val.get("explanation", "")}'
+                    f'</p>',
+                    unsafe_allow_html=True
+                )
+                
+                # 2. Key Insights for that particular question
+                insights = val.get("key_insights", [])
+                if insights:
+                    st.markdown(
+                        '<p style="color:#1DB954; font-size:0.8rem; font-weight:700;'
+                        'text-transform:uppercase; letter-spacing:0.08em; margin:1.2rem 0 0.5rem 0;">'
+                        '🔑 Key Insights</p>',
+                        unsafe_allow_html=True
+                    )
+                    for insight in insights:
+                        st.markdown(f"- **Insight:** {insight}")
+                
+                # 3. Evidence from the Reviews
+                ai_evidence = val.get("evidence", [])
+                real_evidence = _get_evidence(key, n=1)
+                all_evidence = list(ai_evidence) + real_evidence
+                
+                if all_evidence:
+                    st.markdown(
+                        '<p style="color:#B3B3B3; font-size:0.8rem; font-weight:700;'
+                        'text-transform:uppercase; letter-spacing:0.08em; margin:1.2rem 0 0.5rem 0;">'
+                        '🗣 Evidence from the Reviews</p>',
+                        unsafe_allow_html=True
+                    )
+                    for quote in all_evidence:
+                        st.markdown(
+                            f'<div style="border-left:3px solid #1DB954; padding:0.6rem 0.8rem;'
+                            f'margin-bottom:0.5rem; background:#1a1a2e; border-radius:0 6px 6px 0;">'
+                            f'<p style="color:#ccc; font-size:0.85rem; margin:0; font-style:italic;">'
+                            f'&ldquo;{quote}&rdquo;</p></div>',
+                            unsafe_allow_html=True
+                        )
+
+            elif key == "q4" and isinstance(val, dict):
                 st.markdown(
                     '<span style="color:#E8A400;font-weight:700;">⚠ Unwanted Repetition</span>'
                     ' — caused by algorithm failure',
@@ -640,7 +681,11 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q1_ai = questions.get("q1", "")
-        _ai_box(q1_ai if q1_ai else "Run the analysis to generate AI insights.")
+        if isinstance(q1_ai, dict):
+            q1_ai_text = q1_ai.get("explanation", "")
+        else:
+            q1_ai_text = str(q1_ai)
+        _ai_box(q1_ai_text if q1_ai_text else "Run the analysis to generate AI insights.")
     with c_chart:
         try:
             q1_df = _kw_counts(texts, {
@@ -663,7 +708,11 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q2_ai = questions.get("q2", "")
-        _ai_box(q2_ai if q2_ai else "Run the analysis to generate AI insights.")
+        if isinstance(q2_ai, dict):
+            q2_ai_text = q2_ai.get("explanation", "")
+        else:
+            q2_ai_text = str(q2_ai)
+        _ai_box(q2_ai_text if q2_ai_text else "Run the analysis to generate AI insights.")
     with c_chart:
         try:
             q2_df = _kw_counts(texts, {
@@ -686,7 +735,11 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q3_ai = questions.get("q3", "")
-        _ai_box(q3_ai if q3_ai else "Run the analysis to generate AI insights.")
+        if isinstance(q3_ai, dict):
+            q3_ai_text = q3_ai.get("explanation", "")
+        else:
+            q3_ai_text = str(q3_ai)
+        _ai_box(q3_ai_text if q3_ai_text else "Run the analysis to generate AI insights.")
     with c_chart:
         try:
             q3_df = _kw_counts(texts, {
@@ -709,7 +762,9 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q4_ai = questions.get("q4", {})
-        if isinstance(q4_ai, dict):
+        if isinstance(q4_ai, dict) and "explanation" in q4_ai:
+            _ai_box(q4_ai.get("explanation", ""))
+        elif isinstance(q4_ai, dict) and ("unwanted_repetition" in q4_ai or "intentional_repetition" in q4_ai):
             unwanted = q4_ai.get("unwanted_repetition", "")
             intentional = q4_ai.get("intentional_repetition", "")
             st.markdown(
@@ -751,6 +806,11 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q5_ai = questions.get("q5", "")
+        if isinstance(q5_ai, dict):
+            q5_ai_text = q5_ai.get("explanation", "")
+        else:
+            q5_ai_text = str(q5_ai)
+
         if segments:
             # Build a mini segment card list inside the AI panel
             seg_html = (
@@ -773,7 +833,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
             seg_html += '</div>'
             st.markdown(seg_html, unsafe_allow_html=True)
         else:
-            _ai_box(q5_ai if q5_ai else "Run the analysis to generate AI insights.")
+            _ai_box(q5_ai_text if q5_ai_text else "Run the analysis to generate AI insights.")
     with c_chart:
         try:
             if segments:
@@ -812,6 +872,11 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
     c_text, c_chart = st.columns([1, 1])
     with c_text:
         q6_ai = questions.get("q6", "")
+        if isinstance(q6_ai, dict):
+            q6_ai_text = q6_ai.get("explanation", "")
+        else:
+            q6_ai_text = str(q6_ai)
+
         if unmet_needs:
             # Build a mini need list inside the AI panel
             needs_html = (
@@ -832,7 +897,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
             needs_html += '</div>'
             st.markdown(needs_html, unsafe_allow_html=True)
         else:
-            _ai_box(q6_ai if q6_ai else "Run the analysis to generate AI insights.")
+            _ai_box(q6_ai_text if q6_ai_text else "Run the analysis to generate AI insights.")
     with c_chart:
         try:
             if unmet_needs:

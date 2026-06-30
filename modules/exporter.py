@@ -50,23 +50,37 @@ def export_markdown(report: dict, stats: dict) -> str:
             "q1": "1. Why do users struggle to discover new music?",
             "q2": "2. What are the most common recommendation frustrations?",
             "q3": "3. What listening behaviors are users trying to achieve?",
+            "q4": "4. What causes users to repeatedly listen to the same content?",
             "q5": "5. Which user segments experience different challenges?",
             "q6": "6. What unmet needs emerge consistently from reviews?",
         }
         for q_key, q_label in q_labels.items():
             md.append(f"### {q_label}")
-            md.append(f"{questions.get(q_key, 'Not answered.')}")
-            md.append("")
-
-        # Repetition (Q4)
-        q4 = questions.get("q4", {})
-        md.append("### 4. What causes users to repeatedly listen to the same content?")
-        if isinstance(q4, dict):
-            md.append(f"**Unwanted Repetition (Algorithm Failure):** {q4.get('unwanted_repetition', 'Not answered.')}")
-            md.append(f"**Intentional Repetition (User Choice):** {q4.get('intentional_repetition', 'Not answered.')}")
-        else:
-            md.append(str(q4))
-        md.append("")
+            val = questions.get(q_key, "Not answered.")
+            if isinstance(val, dict) and "explanation" in val:
+                md.append(f"{val.get('explanation', '')}")
+                md.append("")
+                
+                insights = val.get("key_insights", [])
+                if insights:
+                    md.append("**Key Insights:**")
+                    for insight in insights:
+                        md.append(f"- {insight}")
+                    md.append("")
+                
+                evidences = val.get("evidence", [])
+                if evidences:
+                    md.append("**Evidence from Reviews:**")
+                    for ev in evidences:
+                        md.append(f"> *Evidence:* \"{ev}\"")
+                    md.append("")
+            elif q_key == "q4" and isinstance(val, dict):
+                md.append(f"**Unwanted Repetition (Algorithm Failure):** {val.get('unwanted_repetition', 'Not answered.')}")
+                md.append(f"**Intentional Repetition (User Choice):** {val.get('intentional_repetition', 'Not answered.')}")
+                md.append("")
+            else:
+                md.append(str(val))
+                md.append("")
     else:
         md.append(f"Research questions not answered: {questions.get('error', 'No data')}")
         md.append("")
@@ -168,32 +182,44 @@ def export_csv(report: dict) -> str:
             "q1": "Why do users struggle to discover new music?",
             "q2": "What are the most common recommendation frustrations?",
             "q3": "What listening behaviors are users trying to achieve?",
+            "q4": "What causes users to repeatedly listen to the same content?",
             "q5": "Which user segments experience different challenges?",
             "q6": "What unmet needs emerge consistently from reviews?",
         }
         for q_key, label in q_labels.items():
-            writer.writerow([
-                "Six Questions",
-                label,
-                questions.get(q_key, ""),
-                ""
-            ])
-
-        # Q4 repetition
-        q4 = questions.get("q4", {})
-        if isinstance(q4, dict):
-            writer.writerow([
-                "Six Questions",
-                "What causes users to repeatedly listen to the same content? (Unwanted)",
-                q4.get("unwanted_repetition", ""),
-                "Algorithm failure"
-            ])
-            writer.writerow([
-                "Six Questions",
-                "What causes users to repeatedly listen to the same content? (Intentional)",
-                q4.get("intentional_repetition", ""),
-                "User deliberate choice"
-            ])
+            val = questions.get(q_key, "")
+            if isinstance(val, dict) and "explanation" in val:
+                detail = val.get("explanation", "")
+                evidence_info = "Insights: " + " | ".join(val.get("key_insights", []))
+                if val.get("evidence", []):
+                    evidence_info += " || Evidence: " + " | ".join(val.get("evidence", []))
+                writer.writerow([
+                    "Six Questions",
+                    label,
+                    detail,
+                    evidence_info
+                ])
+            elif q_key == "q4" and isinstance(val, dict):
+                # Fallback for old q4 dict format
+                writer.writerow([
+                    "Six Questions",
+                    "What causes users to repeatedly listen to the same content? (Unwanted)",
+                    val.get("unwanted_repetition", ""),
+                    "Algorithm failure"
+                ])
+                writer.writerow([
+                    "Six Questions",
+                    "What causes users to repeatedly listen to the same content? (Intentional)",
+                    val.get("intentional_repetition", ""),
+                    "User deliberate choice"
+                ])
+            else:
+                writer.writerow([
+                    "Six Questions",
+                    label,
+                    str(val),
+                    ""
+                ])
 
         # Segments inside questions
         for seg in questions.get("segments", []):

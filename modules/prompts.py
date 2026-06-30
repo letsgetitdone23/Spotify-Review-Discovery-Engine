@@ -114,28 +114,89 @@ STRICT RULES:
   1. Segment users by listening USE-CASE only (e.g. "Mood-based listeners",
      "Genre explorers"). Never segment by age, income, or demographics
      unless a review explicitly mentions them.
-  2. For Q4, you MUST explicitly separate:
+  2. For Q4, you MUST explicitly separate and discuss:
        - UNWANTED repetition: caused by algorithm failure (a problem)
        - INTENTIONAL repetition: deliberate user choice (NOT a problem)
-     Do not treat intentional repetition as a failure.
+     Make sure these two are clearly explained and distinguished.
   3. Do NOT include product suggestions, MVP ideas, or feature recommendations
      anywhere in the response.
   4. Be specific. Avoid generic phrases like "users want better recommendations."
   5. Unmet needs must be framed as "Users need..." or "Listeners want..." —
      never as "Spotify should build..."
-  6. Return ONLY valid JSON. No preamble. No markdown fences. No trailing text.
+  6. For EACH of the six questions (q1, q2, q3, q4, q5, q6), you must return:
+       - explanation: A detailed, clear explanation paragraph of around 150-200 words.
+       - key_insights: An array of 2-3 specific, high-level key insights for that particular question.
+       - evidence: An array of 2-3 paraphrased evidence quotes from the reviews.
+  7. Return ONLY valid JSON. No preamble. No markdown fences. No trailing text.
 
 Return this EXACT JSON structure (do not add or remove any keys):
 {{
-  "q1": "Why users struggle to discover new music — specific causes from reviews",
-  "q2": "Most common recommendation frustrations — specific patterns",
-  "q3": "Listening behaviors users are trying to achieve — specific goals",
-  "q4": {{
-    "unwanted_repetition": "Specific causes of algorithm-driven unwanted repetition",
-    "intentional_repetition": "Where and why repetition is a deliberate user choice"
+  "q1": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining why users struggle to discover new music.",
+    "key_insights": [
+      "Key insight 1 regarding discovery struggles",
+      "Key insight 2 regarding discovery struggles"
+    ],
+    "evidence": [
+      "Paraphrased review quote 1 showing discovery struggle",
+      "Paraphrased review quote 2 showing discovery struggle"
+    ]
   }},
-  "q5": "Which user segments experience different discovery challenges",
-  "q6": "Unmet needs emerging consistently — framed as user needs, not features",
+  "q2": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining the most common recommendation frustrations.",
+    "key_insights": [
+      "Key frustration insight 1",
+      "Key frustration insight 2"
+    ],
+    "evidence": [
+      "Paraphrased review quote 1 showing recommendation frustration",
+      "Paraphrased review quote 2 showing recommendation frustration"
+    ]
+  }},
+  "q3": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining listening behaviors users are trying to achieve.",
+    "key_insights": [
+      "Key behavior insight 1",
+      "Key behavior insight 2"
+    ],
+    "evidence": [
+      "Paraphrased review quote 1 showing desired listening behavior",
+      "Paraphrased review quote 2 showing desired listening behavior"
+    ]
+  }},
+  "q4": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining what causes users to repeatedly listen to the same content. You must address both unwanted repetition (algorithm loop/failure) and intentional repetition (deliberate user choice) in this paragraph.",
+    "key_insights": [
+      "Key insight on unwanted repetition (algorithm failure)",
+      "Key insight on intentional repetition (deliberate choice)"
+    ],
+    "evidence": [
+      "Paraphrased review quote showing unwanted repetition",
+      "Paraphrased review quote showing intentional repetition"
+    ]
+  }},
+  "q5": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining which user segments experience different discovery challenges.",
+    "key_insights": [
+      "Key insight on segment-specific challenges 1",
+      "Key insight on segment-specific challenges 2"
+    ],
+    "evidence": [
+      "Paraphrased review quote showing segment behavior/challenge 1",
+      "Paraphrased review quote showing segment behavior/challenge 2"
+    ]
+  }},
+  "q6": {{
+    "explanation": "A paragraph explanation of around 150-200 words explaining unmet needs emerging consistently, framed as user needs, not features.",
+    "key_insights": [
+      "Key insight on consistent unmet needs 1",
+      "Key insight on consistent unmet needs 2"
+    ],
+    "evidence": [
+      "Paraphrased review quote highlighting unmet need 1",
+      "Paraphrased review quote highlighting unmet need 2"
+    ]
+  }},
   "segments": [
     {{
       "name": "Segment name — use-case based (e.g. 'Mood-based listeners')",

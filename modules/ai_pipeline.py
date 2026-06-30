@@ -225,7 +225,7 @@ def run_analysis(df) -> dict:
     # CALL 2 — Six Questions + User Segments
     # ------------------------------------------------------------------
     time.sleep(1.0)
-    raw2 = call_llm(prompt_six_questions_and_segments(theme_summary, n_reviews), key_manager, max_tokens=1500)
+    raw2 = call_llm(prompt_six_questions_and_segments(theme_summary, n_reviews), key_manager, max_tokens=3500)
     try:
         questions_and_segments = parse_json_response(raw2)
         if not isinstance(questions_and_segments, dict):
@@ -240,7 +240,7 @@ def run_analysis(df) -> dict:
     # CALL 3 — Root Causes + Unmet Needs
     # ------------------------------------------------------------------
     time.sleep(1.0)
-    raw3 = call_llm(prompt_root_causes_and_needs(theme_summary), key_manager, max_tokens=1500)
+    raw3 = call_llm(prompt_root_causes_and_needs(theme_summary), key_manager, max_tokens=2500)
     try:
         root_and_needs = parse_json_response(raw3)
         if not isinstance(root_and_needs, dict):

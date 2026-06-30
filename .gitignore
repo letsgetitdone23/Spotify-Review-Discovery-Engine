@@ -17,3 +17,6 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Workflow documentation
+AI_Review_Discovery_Engine_Workflow.md
