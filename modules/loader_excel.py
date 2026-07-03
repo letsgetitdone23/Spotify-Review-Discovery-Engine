@@ -13,9 +13,13 @@ Required column in every sheet: review_text
 Optional columns               : source, date, rating, language
 """
 
+import os
 import pandas as pd
 
-EXCEL_PATH = "data/reviews_preloaded.xlsx"
+# Resolve path relative to this module's location so it works regardless
+# of which directory Streamlit is launched from.
+_MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
+EXCEL_PATH = os.path.join(_MODULE_DIR, "..", "data", "reviews_preloaded.xlsx")
 
 # Columns that are optional — added with None if absent in a sheet
 OPTIONAL_COLUMNS = ["source", "date", "rating", "language"]
@@ -47,7 +51,7 @@ def _normalize_sheet(df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
     # Clean review_text
     df = df.dropna(subset=["review_text"])
     df["review_text"] = df["review_text"].astype(str).str.strip()
-    df = df[df["review_text"].str.len() >= 20]
+    df = df[df["review_text"].str.len() >= 2]
 
     return df
 
