@@ -402,7 +402,7 @@ if run_btn:
             st.error(f"Unexpected error during AI analysis: {e}")
             st.stop()
 
-    st.success("✅ Analysis complete! Scroll down to explore the report.", icon="🎉")
+    st.success("✅ Analysis complete! Scroll down and check the below tabs to explore the report.", icon="🎉")
 
 # ===========================================================================
 # Report rendering — 6 tabs
