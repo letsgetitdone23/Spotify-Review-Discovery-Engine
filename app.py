@@ -17,7 +17,7 @@ from PIL import Image
 load_dotenv()  # loads .env locally; Streamlit Cloud uses Secrets panel
 
 # --- Page config (must be the very first Streamlit call) ---
-_page_icon = Image.open("spotify_icon.png")
+_page_icon = Image.open("logo/spotifylogo.png")
 st.set_page_config(
     page_title="Spotify Review Discovery Engine",
     page_icon=_page_icon,
