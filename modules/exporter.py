@@ -42,8 +42,8 @@ def export_markdown(report: dict, stats: dict) -> str:
         md.append("No themes identified.")
         md.append("")
 
-    # Section 2: Six Questions
-    md.append("## ❓ Research Questions & Answers")
+    # Section 2: Patterns and Needs
+    md.append("## ❓ Patterns and Needs")
     questions = report.get("questions", {})
     if questions and "error" not in questions:
         q_labels = {
@@ -82,7 +82,7 @@ def export_markdown(report: dict, stats: dict) -> str:
                 md.append(str(val))
                 md.append("")
     else:
-        md.append(f"Research questions not answered: {questions.get('error', 'No data')}")
+        md.append(f"Patterns and needs analysis not answered: {questions.get('error', 'No data')}")
         md.append("")
 
     # Section 3: User Segments
@@ -194,7 +194,7 @@ def export_csv(report: dict) -> str:
                 if val.get("evidence", []):
                     evidence_info += " || Evidence: " + " | ".join(val.get("evidence", []))
                 writer.writerow([
-                    "Six Questions",
+                    "Patterns and Needs",
                     label,
                     detail,
                     evidence_info
@@ -202,20 +202,20 @@ def export_csv(report: dict) -> str:
             elif q_key == "q4" and isinstance(val, dict):
                 # Fallback for old q4 dict format
                 writer.writerow([
-                    "Six Questions",
+                    "Patterns and Needs",
                     "What causes users to repeatedly listen to the same content? (Unwanted)",
                     val.get("unwanted_repetition", ""),
                     "Algorithm failure"
                 ])
                 writer.writerow([
-                    "Six Questions",
+                    "Patterns and Needs",
                     "What causes users to repeatedly listen to the same content? (Intentional)",
                     val.get("intentional_repetition", ""),
                     "User deliberate choice"
                 ])
             else:
                 writer.writerow([
-                    "Six Questions",
+                    "Patterns and Needs",
                     label,
                     str(val),
                     ""

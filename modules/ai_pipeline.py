@@ -5,7 +5,7 @@ Orchestrates the 3-call LLM analysis pipeline on filtered Spotify reviews.
 
 Pipeline flow:
   CALL 1 — Theme extraction   (batches of 30, max 3 batches)
-  CALL 2 — Six questions + user segments
+  CALL 2 — Patterns and needs + user segments
   CALL 3 — Root causes + unmet needs
 
 Calls 2 and 3 receive a compressed theme_summary string (not raw reviews)
@@ -160,7 +160,7 @@ def run_analysis(df) -> dict:
     Pipeline:
       CALL 1 — Theme extraction from batches of 30 reviews (max 3 batches).
                Deduplicates themes by name. Builds a compressed theme_summary.
-      CALL 2 — Six research questions + use-case-based user segments.
+      CALL 2 — Patterns and needs + use-case-based user segments.
                Input: theme_summary + total review count.
       CALL 3 — Root cause synthesis + unmet needs extraction.
                Input: theme_summary.
@@ -222,7 +222,7 @@ def run_analysis(df) -> dict:
         theme_summary = "No themes could be extracted from the provided reviews."
 
     # ------------------------------------------------------------------
-    # CALL 2 — Six Questions + User Segments
+    # CALL 2 — Patterns and Needs + User Segments
     # ------------------------------------------------------------------
     time.sleep(1.0)
     raw2 = call_llm(prompt_six_questions_and_segments(theme_summary, n_reviews), key_manager, max_tokens=3500)
@@ -232,7 +232,7 @@ def run_analysis(df) -> dict:
             raise ValueError("Expected a JSON object from Call 2")
     except Exception as e:
         questions_and_segments = {
-            "error": f"Six-question analysis failed: {e}",
+            "error": f"Patterns-and-needs analysis failed: {e}",
             "segments": [],
         }
 

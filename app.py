@@ -4,7 +4,7 @@ app.py — Spotify AI-Powered Review Discovery Engine
 Streamlit entry point. Orchestrates the full Day-1 pipeline:
   1. Load all reviews from the preloaded Excel workbook (5 sheets)
   2. Classify reviews into HIGH / MEDIUM / LOW relevance tiers
-  3. Run 3-call AI analysis (theme extraction → 6 questions → root causes)
+  3. Run 3-call AI analysis (theme extraction → patterns and needs → root causes)
   4. Render a 6-tab Spotify-themed report
 
 Day-2 additions (live scrapers + export) are stubbed and ready to wire in.
@@ -416,7 +416,7 @@ if st.session_state.report is not None:
     tabs = st.tabs([
         "📊 Overview",
         "🎯 Themes",
-        "❓ Six Questions",
+        "❓ Patterns and Needs",
         "👤 Segments",
         "🔍 Root Causes",
         "💡 Unmet Needs",

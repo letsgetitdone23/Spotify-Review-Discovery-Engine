@@ -8,7 +8,7 @@ st.markdown with unsafe_allow_html=True for the custom CSS card/badge system.
 Tab mapping:
   render_dataset_overview()  → 📊 Overview
   render_themes()            → 🎯 Themes
-  render_six_questions()     → ❓ Six Questions
+  render_six_questions()     → ❓ Patterns and Needs
   render_segments()          → 👤 Segments
   render_root_causes()       → 🔍 Root Causes
   render_unmet_needs()       → 💡 Unmet Needs
@@ -192,6 +192,40 @@ def render_dataset_overview(df, filtered_df, mode: str):
             height=220,
         )
 
+    # --- Tab navigation guide ---
+    st.markdown("---")
+    st.markdown(
+        '<p class="section-header">🗂 Explore the Full Analysis</p>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        '<p class="muted" style="margin-bottom:1.2rem;">'
+        'The dataset is loaded and classified. Use the tabs above to dive deeper into each layer of the analysis.'
+        '</p>',
+        unsafe_allow_html=True,
+    )
+
+    tab_guide = [
+        ("🎯", "Themes",             "Recurring pain points extracted from reviews, ranked by frequency."),
+        ("❓", "Patterns and Needs", "Detailed answers to 6 research questions — with key insights and user evidence."),
+        ("👤", "Segments",           "Use-case based listener segments and their discovery blockers."),
+        ("🔍", "Root Causes",        "Systemic causes behind discovery failure and unwanted repetition."),
+        ("💡", "Unmet Needs",        "Listener needs identified from the reviews, framed as user statements."),
+        ("🔑", "Key Insights",       "High-level takeaways and 6 keyword-frequency infographics."),
+    ]
+
+    for icon, tab_name, description in tab_guide:
+        st.markdown(
+            f'<div class="insight-card" style="display:flex;align-items:flex-start;gap:1rem;padding:0.9rem 1.2rem;margin-bottom:0.6rem;">'
+            f'  <span style="font-size:1.5rem;line-height:1;">{icon}</span>'
+            f'  <div>'
+            f'    <p style="margin:0;font-weight:700;color:#FFFFFF;font-size:0.95rem;">{tab_name}</p>'
+            f'    <p class="muted" style="margin:0.2rem 0 0 0;font-size:0.85rem;">{description}</p>'
+            f'  </div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
+
 
 # ---------------------------------------------------------------------------
 # Tab 2 — Discovery Theme Analysis
@@ -240,12 +274,12 @@ def render_themes(themes: list):
 
 
 # ---------------------------------------------------------------------------
-# Tab 3 — Six Research Questions
+# Tab 3 — Patterns and Needs
 # ---------------------------------------------------------------------------
 
 def render_six_questions(questions: dict, filtered_df=None):
     """
-    Render the Six Questions tab.
+    Render the Patterns and Needs tab.
 
     Each question in an st.expander showing:
       - A detailed paragraph answer (150-200 words)
@@ -254,7 +288,7 @@ def render_six_questions(questions: dict, filtered_df=None):
     """
     import random
 
-    _section_header("Answers to the Six Research Questions")
+    _section_header("Patterns and Needs")
 
     if "error" in questions:
         st.error(f"Analysis error: {questions['error']}")
@@ -581,7 +615,7 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
 
     Shows:
       - Systemic key insights with impact + actionable takeaway cards
-      - 6 infographic charts — one per research question:
+      - 6 infographic charts — one per pattern/need:
           ❶ Why do users struggle to discover new music?
           ❷ What are the most common recommendation frustrations?
           ❸ What listening behaviors are users trying to achieve?
@@ -630,10 +664,10 @@ def render_key_insights(data: dict, df, filtered_df, report: dict = None):
         st.info("No key insights were generated. Try running the analysis again.")
 
     st.markdown("---")
-    _section_header("Infographics — Six Research Questions Visualised")
+    _section_header("Infographics — Patterns and Needs Visualised")
     st.markdown(
         '<p class="muted" style="margin-bottom:1.2rem;">'
-        'For each research question: the <strong style="color:#fff;">AI analysis</strong> '
+        'For each pattern and need: the <strong style="color:#fff;">AI analysis</strong> '
         '(left) paired with a <strong style="color:#fff;">keyword-frequency chart</strong> '
         'measuring how many discovery-relevant reviews echo each pattern (right).'
         '</p>',

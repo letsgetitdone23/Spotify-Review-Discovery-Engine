@@ -86,12 +86,12 @@ Reviews:
 
 
 # ---------------------------------------------------------------------------
-# Call 2 — Six Research Questions + User Segments
+# Call 2 — Patterns and Needs + User Segments
 # ---------------------------------------------------------------------------
 
 def prompt_six_questions_and_segments(summary: str, n_reviews: int) -> str:
     """
-    Build the Call-2 prompt: answer 6 research questions and identify
+    Build the Call-2 prompt: answer patterns-and-needs questions and identify
     use-case-based user segments.
 
     Args:
@@ -108,7 +108,7 @@ def prompt_six_questions_and_segments(summary: str, n_reviews: int) -> str:
 You are a product researcher. Below is a summary of themes extracted from
 {n_reviews} Spotify user reviews about music discovery and repetitive listening.
 
-Answer all six research questions AND identify user segments.
+Answer all patterns-and-needs questions AND identify user segments.
 
 STRICT RULES:
   1. Segment users by listening USE-CASE only (e.g. "Mood-based listeners",

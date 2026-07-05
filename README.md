@@ -28,7 +28,7 @@ A keyword-scoring classifier that eliminates noise (billing, crash, login) and i
 
 ### 🤖 3-Stage Sequential AI Pipeline
 - **Call 1 — Theme Extraction:** Surfaces recurring pain points with frequency labels (High / Medium / Low) and a paraphrased review example per theme.
-- **Call 2 — Six Questions + Segments:** Answers 6 research questions with detailed explanations, key insights, and specific evidence, and clusters users into listening use-case segments (not demographics).
+- **Call 2 — Patterns and Needs + Segments:** Answers 6 patterns-and-needs questions with detailed explanations, key insights, and specific evidence, and clusters users into listening use-case segments (not demographics).
 - **Call 3 — Root Cause & Needs Synthesis:** Maps systemic causes of discovery failure and frames unmet needs as listener-centric statements.
 - Supports **Groq** (Llama-3.1-8b) as primary and **Gemini** (Gemini-2.0-flash) as fallback with automatic key rotation on rate limits.
 
@@ -38,11 +38,11 @@ A keyword-scoring classifier that eliminates noise (billing, crash, login) and i
 |-----|---------|
 | 📊 Overview | Review counts, relevance tier breakdown, source table, rating distribution |
 | 🎯 Themes | Theme cards with frequency badge and paraphrased user example |
-| ❓ Six Questions | Detailed paragraph explanation (150–200 words) + 🔑 Key Insights list + 🗣 Evidence from the Reviews (combined AI-paraphrased quotes & matching real-world review snippets) |
+| ❓ Patterns and Needs | Detailed paragraph explanation (150–200 words) + 🔑 Key Insights list + 🗣 Evidence from the Reviews (combined AI-paraphrased quotes & matching real-world review snippets) |
 | 👤 Segments | Use-case based user segment cards with discovery blocker and evidence |
 | 🔍 Root Causes | Bulleted root causes of discovery failure + unwanted repetition causes |
 | 💡 Unmet Needs | Need statements framed as "Users need..." with evidence and segment label |
-| 🔑 Key Insights | Systemic insight cards + **6 Plotly infographics** (one per research question) in Spotify green |
+| 🔑 Key Insights | Systemic insight cards + **6 Plotly infographics** (one per pattern/need) in Spotify green |
 
 ### 📈 Spotify-Colored Infographics (Tab 7)
 All 6 infographic charts use full Spotify branding:
