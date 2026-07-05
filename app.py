@@ -12,13 +12,15 @@ Day-2 additions (live scrapers + export) are stubbed and ready to wire in.
 
 import streamlit as st
 from dotenv import load_dotenv
+from PIL import Image
 
 load_dotenv()  # loads .env locally; Streamlit Cloud uses Secrets panel
 
 # --- Page config (must be the very first Streamlit call) ---
+_page_icon = Image.open("spotify_icon.png")
 st.set_page_config(
     page_title="Spotify Review Discovery Engine",
-    page_icon="🎵",
+    page_icon=_page_icon,
     layout="wide",
     initial_sidebar_state="expanded",
 )
