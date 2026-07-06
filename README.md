@@ -6,7 +6,7 @@
 
 ## 🚀 Live Demo
 The application is deployed on Streamlit Community Cloud:  
-**[Live App Link](https://spotify-discovery-engine-s9dbbg7cxuxhxymdshdacu.streamlit.app/)**
+**[🎧 Launch Live App → spotifyai-review-discovery-engine.streamlit.app](https://spotifyai-review-discovery-engine.streamlit.app/)**
 
 ---
 
