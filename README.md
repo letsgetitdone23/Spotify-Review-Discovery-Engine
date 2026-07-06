@@ -13,7 +13,7 @@ The application is deployed on Streamlit Community Cloud:
 ## ✨ Features
 
 ### 📥 Dual Analysis Modes
-- **Preloaded Dataset** — Loads 973 historical reviews from an Excel workbook (5 source sheets).
+- **Preloaded Dataset** — Loads 2,025 historical reviews from an Excel workbook (5 source sheets).
 - **Live Collection** — Scrapes real-time content from 3 sources simultaneously:
   - 🛒 **Google Play Store** — User reviews for the Spotify Android app
   - 🍎 **Apple App Store** — User reviews via the iTunes RSS feed
