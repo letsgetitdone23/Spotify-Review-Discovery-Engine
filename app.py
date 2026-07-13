@@ -259,6 +259,7 @@ with st.sidebar:
     mode = st.radio(
         "Analysis Mode",
         ["Preloaded Dataset", "Live Collection"],
+        key="analysis_mode_radio",
         help="Live Collection scrapes real-time reviews from Google Play Store & Apple App Store.",
     )
 
@@ -276,6 +277,7 @@ with st.sidebar:
             max_value=2000,
             value=400,
             step=50,
+            key="scrape_count_slider",
             help="Total reviews to fetch across both sources. Split ~75% Play Store / 25% App Store.",
         )
     else:
@@ -283,7 +285,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    run_btn = st.button("▶  Run Analysis", use_container_width=True)
+    run_btn = st.button("▶  Run Analysis", key="run_analysis_btn", use_container_width=True)
 
     st.markdown("---")
 
@@ -467,6 +469,7 @@ if st.session_state.report is not None:
             data=md_report,
             file_name="spotify_discovery_report.md",
             mime="text/markdown",
+            key="download_md_btn",
             use_container_width=True
         )
     with col2:
@@ -475,6 +478,7 @@ if st.session_state.report is not None:
             data=csv_report,
             file_name="spotify_discovery_report.csv",
             mime="text/csv",
+            key="download_csv_btn",
             use_container_width=True
         )
 
