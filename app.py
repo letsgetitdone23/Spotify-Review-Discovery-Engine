@@ -285,7 +285,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    run_btn = st.button("▶  Run Analysis", key="run_analysis_btn", use_container_width=True)
+    run_btn = st.button("▶  Run Analysis", key="run_analysis_btn", width='stretch')
 
     st.markdown("---")
 
@@ -470,7 +470,7 @@ if st.session_state.report is not None:
             file_name="spotify_discovery_report.md",
             mime="text/markdown",
             key="download_md_btn",
-            use_container_width=True
+            width='stretch'
         )
     with col2:
         st.download_button(
@@ -479,7 +479,7 @@ if st.session_state.report is not None:
             file_name="spotify_discovery_report.csv",
             mime="text/csv",
             key="download_csv_btn",
-            use_container_width=True
+            width='stretch'
         )
 
 # ===========================================================================

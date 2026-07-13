@@ -110,7 +110,7 @@ def _spotify_bar_chart(
         ),
         height=height,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True)  # plotly_chart still uses use_container_width
     if caption:
         st.markdown(
             f'<p class="muted" style="font-size:0.78rem;text-align:center;margin-top:0.3rem;">'
